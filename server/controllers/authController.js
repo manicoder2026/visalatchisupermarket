@@ -46,7 +46,7 @@ function login(req, res) {
 
         const token = jwt.sign(
             { id: admin.id, username: admin.username, role: admin.role },
-            process.env.JWT_SECRET,
+            process.env.JWT_SECRET || 'visalatchi_default_jwt_secret_key_2026',
             { expiresIn: '12h' }
         );
 

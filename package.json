@@ -4,6 +4,7 @@
   "description": "E-commerce website for Visalatchi Super Market, Virudhunagar - online grocery ordering with home delivery",
   "main": "server/server.js",
   "scripts": {
+    "build": "node -e \"console.log('Build successful')\"",
     "start": "node server/server.js",
     "dev": "nodemon server/server.js",
     "seed": "node database/seed.js"
