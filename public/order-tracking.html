@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Track Your Order | Visalatchi Super Market</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<header class="site-header">
+    <div class="container header-top">
+        <a href="index.html" class="logo">
+            <span class="logo-name">VISALATCHI</span>
+            <span class="logo-tagline">SUPER MARKET</span>
+        </a>
+        <a href="products.html" class="btn btn-outline btn-sm">Continue Shopping</a>
+    </div>
+</header>
+
+<section class="section">
+    <div class="container">
+        <div style="max-width:760px; margin:0 auto;">
+
+            <!-- Order lookup form -->
+            <div class="form-card" style="margin-bottom:24px;">
+                <h3 style="margin-bottom:14px;">Track Your Order</h3>
+                <div style="display:flex; gap:10px;">
+                    <input type="text" id="orderLookupInput" placeholder="Enter your Order ID e.g. VSM100245" style="flex:1; padding:11px 14px; border:1.5px solid var(--border); border-radius:8px;">
+                    <button class="btn btn-primary" id="trackBtn">Track</button>
+                </div>
+            </div>
+
+            <div id="trackingResult"></div>
+        </div>
+    </div>
+</section>
+
+<script src="js/app.js"></script>
+<script>
+const STATUS_STEPS = ['Pending', 'Confirmed', 'Packing', 'Out for Delivery', 'Delivered'];
+const STATUS_LABELS = {
+    'Pending': 'Order Received',
+    'Confirmed': 'Order Confirmed',
+    'Packing': 'Packing',
+    'Out for Delivery': 'Out for Delivery',
+    'Delivered': 'Delivered'
+};
+
+document.addEventListener('DOMContentLoaded', () => {
+    document.getElementById('trackBtn').addEventListener('click', () => {
+        const orderId = document.getElementById('orderLookupInput').value.trim();
+        if (orderId) loadTracking(orderId);
+    });
+
+    document.getElementById('orderLookupInput').addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') document.getElementById('trackBtn').click();
+    });
+
+    const params = new URLSearchParams(window.location.search);
+    const orderId = params.get('order');
+    if (orderId) {
+        document.getElementById('orderLookupInput').value = orderId;
+        loadTracking(orderId);
+    }
+});
+
+async function loadTracking(orderId) {
+    const resultBox = document.getElementById('trackingResult');
+    resultBox.innerHTML = `<div class="skeleton skeleton-card" style="height:180px;"></div>`;
+
+    try {
+        const data = await apiRequest(`${API_BASE}/orders/${encodeURIComponent(orderId)}`);
+        const order = data.order;
+        const items = data.items;
+
+        if (order.status === 'Cancelled') {
+            resultBox.innerHTML = `
+                <div class="confirmation-box">
+                    <h2 style="color:var(--red);">Order Cancelled</h2>
+                    <p style="color:var(--text-muted); margin-top:8px;">Order ${escapeHtml(order.order_number)} has been cancelled.</p>
+                </div>
+            `;
+            return;
+        }
+
+        const currentIndex = STATUS_STEPS.indexOf(order.status);
+        const fillPercent = currentIndex <= 0 ? 0 : (currentIndex / (STATUS_STEPS.length - 1)) * 100;
+
+        const stepsHtml = STATUS_STEPS.map((step, i) => {
+            let cls = '';
+            if (i < currentIndex) cls = 'done';
+            else if (i === currentIndex) cls = 'current';
+            return `
+                <div class="tracking-step ${cls}">
+                    <div class="step-circle">${i < currentIndex ? '✓' : i + 1}</div>
+                    <div class="step-label">${STATUS_LABELS[step]}</div>
+                </div>
+            `;
+        }).join('');
+
+        const itemsHtml = items.map(item => `
+            <div class="mini-row" style="display:flex; justify-content:space-between; font-size:14px; margin-bottom:8px;">
+                <span>${escapeHtml(item.product_name)} (${escapeHtml(item.unit || '')}) × ${item.quantity}</span>
+                <span>${formatPrice(item.subtotal)}</span>
+            </div>
+        `).join('');
+
+        resultBox.innerHTML = `
+            <div class="form-card">
+                <h3>Order ${escapeHtml(order.order_number)}</h3>
+                <p style="color:var(--text-muted); font-size:13.5px; margin:6px 0 20px;">Placed on ${new Date(order.created_at).toLocaleString('en-IN')}</p>
+
+                <div style="position:relative;">
+                    <div class="tracking-line"></div>
+                    <div class="tracking-line-fill" style="width:${fillPercent}%;"></div>
+                    <div class="tracking-steps">${stepsHtml}</div>
+                </div>
+
+                <hr style="border:none; border-top:1px solid var(--border); margin:30px 0 18px;">
+
+                <h4 style="margin-bottom:12px;">Order Items</h4>
+                ${itemsHtml}
+
+                <div class="summary-row total" style="margin-top:14px;"><span>Total</span><span>${formatPrice(order.total)}</span></div>
+                <div style="font-size:13.5px; color:var(--text-muted); margin-top:14px;">
+                    Delivering to: ${escapeHtml(order.house_number || '')} ${escapeHtml(order.street)}, ${escapeHtml(order.area)}, ${escapeHtml(order.city)} – ${escapeHtml(order.pincode)}
+                </div>
+            </div>
+        `;
+    } catch (err) {
+        resultBox.innerHTML = `<div class="empty-state"><p>Order not found. Please check your Order ID and try again.</p></div>`;
+    }
+}
+</script>
+</body>
+</html>

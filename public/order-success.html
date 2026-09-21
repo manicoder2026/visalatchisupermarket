@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Order Placed | Visalatchi Super Market</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<header class="site-header">
+    <div class="container header-top">
+        <a href="index.html" class="logo">
+            <span class="logo-name">VISALATCHI</span>
+            <span class="logo-tagline">SUPER MARKET</span>
+        </a>
+    </div>
+</header>
+
+<section class="section">
+    <div class="container">
+        <div class="confirmation-box" id="confirmationBox">
+            <div class="confirmation-icon">✓</div>
+            <h2>Loading your order...</h2>
+        </div>
+    </div>
+</section>
+
+<script src="js/app.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', async () => {
+    const params = new URLSearchParams(window.location.search);
+    const orderNumber = params.get('order');
+    const box = document.getElementById('confirmationBox');
+
+    if (!orderNumber) {
+        box.innerHTML = `<h2>No order found</h2><p style="color:var(--text-muted); margin:12px 0;">We couldn't find an order to show.</p><a href="index.html" class="btn btn-primary">Go Home</a>`;
+        return;
+    }
+
+    try {
+        const data = await apiRequest(`${API_BASE}/orders/${orderNumber}`);
+        const order = data.order;
+
+        box.innerHTML = `
+            <div class="confirmation-icon">✓</div>
+            <h2>Order Placed Successfully!</h2>
+            <p style="color:var(--text-muted); margin-top:6px;">Thank you for shopping with VISALATCHI SUPER MARKET.</p>
+            <div class="order-id-box">
+                Order ID: <strong>${escapeHtml(order.order_number)}</strong><br>
+                Total: <strong>${formatPrice(order.total)}</strong><br>
+                Delivery: <strong style="color:var(--green-mid);">FREE</strong><br>
+                Status: <strong>${escapeHtml(order.status)}</strong>
+            </div>
+            <div style="display:flex; gap:12px; justify-content:center; flex-wrap:wrap;">
+                <a href="products.html" class="btn btn-secondary">Continue Shopping</a>
+                <a href="order-tracking.html?order=${escapeHtml(order.order_number)}" class="btn btn-primary">View Order</a>
+            </div>
+        `;
+    } catch (err) {
+        box.innerHTML = `<h2>Order not found</h2><p style="color:var(--text-muted); margin:12px 0;">Please check your order ID and try again.</p><a href="index.html" class="btn btn-primary">Go Home</a>`;
+    }
+});
+</script>
+</body>
+</html>

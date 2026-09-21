@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin Dashboard | Visalatchi Super Market</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body class="admin-body">
+
+<!-- ===================== LOGIN SCREEN ===================== -->
+<div id="loginScreen">
+    <div class="admin-login-box">
+        <h2>Staff Login</h2>
+        <p>VISALATCHI SUPER MARKET admin dashboard</p>
+        <div class="form-group">
+            <label for="loginUsername">Username</label>
+            <input type="text" id="loginUsername" placeholder="Username">
+        </div>
+        <div class="form-group">
+            <label for="loginPassword">Password</label>
+            <input type="password" id="loginPassword" placeholder="Password">
+        </div>
+        <button class="btn btn-primary btn-block btn-lg" id="loginBtn">Log In</button>
+        <p style="font-size:12px; color:var(--text-muted); text-align:center; margin-top:16px;">
+            Default admin credentials are set in your .env file.
+        </p>
+    </div>
+</div>
+
+<!-- ===================== ADMIN DASHBOARD ===================== -->
+<div id="adminDashboard" class="admin-layout hidden">
+    <aside class="admin-sidebar">
+        <span class="logo-name">VISALATCHI</span>
+        <a class="admin-nav-item active" data-view="dashboardView">📊 Dashboard</a>
+        <a class="admin-nav-item" data-view="productsView">📦 Products</a>
+        <a class="admin-nav-item" data-view="importView">📥 Import / Export</a>
+        <a class="admin-nav-item" data-view="ordersView">🧾 Orders</a>
+        <a class="admin-nav-item" id="logoutBtn" style="margin-top:30px;">🚪 Log Out</a>
+        <a class="admin-nav-item" href="index.html">🌐 View Website</a>
+    </aside>
+
+    <main class="admin-main">
+        <div class="admin-topbar">
+            <h1 id="adminPageTitle">Dashboard</h1>
+            <span id="adminUsername" style="font-size:14px; color:var(--text-muted);"></span>
+        </div>
+
+        <!-- ---------- DASHBOARD VIEW ---------- -->
+        <div id="dashboardView" class="admin-view">
+            <div class="stat-grid">
+                <div class="stat-card"><div class="stat-label">Total Products</div><div class="stat-value" id="statProducts">-</div></div>
+                <div class="stat-card"><div class="stat-label">Total Orders</div><div class="stat-value" id="statOrders">-</div></div>
+                <div class="stat-card"><div class="stat-label">Pending Orders</div><div class="stat-value" id="statPending">-</div></div>
+                <div class="stat-card"><div class="stat-label">Today's Orders</div><div class="stat-value" id="statTodayOrders">-</div></div>
+                <div class="stat-card"><div class="stat-label">Today's Sales</div><div class="stat-value" id="statTodaySales">-</div></div>
+            </div>
+            <div class="admin-panel">
+                <h3 style="margin-bottom:10px;">Quick Tips</h3>
+                <p style="color:var(--text-muted); font-size:14px; line-height:1.7;">
+                    Use <strong>Products</strong> to add, edit or remove items one at a time.<br>
+                    Use <strong>Import / Export</strong> to upload the full product list from a CSV file (converted from the Word document).<br>
+                    Use <strong>Orders</strong> to view incoming orders and update their status as your team packs and delivers them.
+                </p>
+            </div>
+        </div>
+
+        <!-- ---------- PRODUCTS VIEW ---------- -->
+        <div id="productsView" class="admin-view hidden">
+            <div class="admin-panel">
+                <div class="admin-panel-head">
+                    <input type="text" id="productSearchInput" placeholder="Search by name, code or category..." style="padding:9px 14px; border:1px solid var(--border); border-radius:8px; width:300px;">
+                    <button class="btn btn-primary" id="addProductBtn">+ Add Product</button>
+                </div>
+                <div style="overflow-x:auto;">
+                    <table class="admin-table">
+                        <thead>
+                            <tr>
+                                <th>Code</th><th>Name</th><th>Category</th><th>Brand</th>
+                                <th>Price</th><th>Offer</th><th>Stock</th><th>Status</th><th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="productsTableBody">
+                            <tr><td colspan="9" style="text-align:center; padding:30px;">Loading products...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="pagination" id="productsPagination"></div>
+            </div>
+        </div>
+
+        <!-- ---------- IMPORT / EXPORT VIEW ---------- -->
+        <div id="importView" class="admin-view hidden">
+            <div class="admin-panel">
+                <h3 style="margin-bottom:6px;">Bulk Product Import</h3>
+                <p style="color:var(--text-muted); font-size:13.5px; margin-bottom:16px;">
+                    Upload a CSV file to add or update products in bulk. This is how the 3000-product list
+                    (converted from the Word document) gets loaded into the store.
+                </p>
+
+                <div class="import-drop">
+                    <p style="margin-bottom:10px;">📄 Choose a CSV file to upload</p>
+                    <input type="file" id="csvFileInput" accept=".csv">
+                </div>
+                <button class="btn btn-primary" id="importBtn">Upload &amp; Import</button>
+                <a href="#" class="btn btn-outline" id="exportBtn" style="margin-left:8px;">Download Current Products (CSV)</a>
+
+                <div id="importResults" class="import-results hidden"></div>
+
+                <h4 style="margin-top:26px; margin-bottom:8px;">Required CSV Format</h4>
+                <p style="color:var(--text-muted); font-size:13px; margin-bottom:8px;">
+                    Your CSV needs these column headers in the first row (product_code, product_name, category and price are required; the rest are optional):
+                </p>
+                <pre style="background:var(--green-pale); padding:12px; border-radius:8px; font-size:12.5px; overflow-x:auto;">product_code,product_name,category,brand,price,offer_price,stock,unit,image
+RIC001,Aashirvaad Rice,Rice,Aashirvaad,650,599,30,5 kg,</pre>
+                <p style="color:var(--text-muted); font-size:12.5px; margin-top:8px;">
+                    Tip: if your product list is currently a Word document, open it in Word, select the table, and use
+                    "Save As" → CSV, or copy it into Excel/Google Sheets and export as CSV.
+                    Products with a <code>product_code</code> that already exists will be updated automatically instead of duplicated.
+                </p>
+            </div>
+
+            <div class="admin-panel">
+                <h3 style="margin-bottom:10px;">Bulk Price / Stock Update</h3>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Category</label>
+                        <input type="text" id="bulkPriceCategory" placeholder="e.g. Rice">
+                    </div>
+                    <div class="form-group">
+                        <label>Price Change (%) — use negative for discount</label>
+                        <input type="number" id="bulkPricePercent" placeholder="e.g. 5 or -10">
+                    </div>
+                </div>
+                <button class="btn btn-secondary" id="bulkPriceBtn">Update Prices for Category</button>
+            </div>
+        </div>
+
+        <!-- ---------- ORDERS VIEW ---------- -->
+        <div id="ordersView" class="admin-view hidden">
+            <div class="admin-panel">
+                <div class="admin-panel-head">
+                    <h3>Orders</h3>
+                    <select id="orderStatusFilter" style="padding:8px 12px; border:1px solid var(--border); border-radius:8px;">
+                        <option value="">All Statuses</option>
+                        <option value="Pending">Pending</option>
+                        <option value="Confirmed">Confirmed</option>
+                        <option value="Packing">Packing</option>
+                        <option value="Out for Delivery">Out for Delivery</option>
+                        <option value="Delivered">Delivered</option>
+                        <option value="Cancelled">Cancelled</option>
+                    </select>
+                </div>
+                <div style="overflow-x:auto;">
+                    <table class="admin-table">
+                        <thead>
+                            <tr><th>Order ID</th><th>Customer</th><th>Phone</th><th>Total</th><th>Date</th><th>Status</th><th>Actions</th></tr>
+                        </thead>
+                        <tbody id="ordersTableBody">
+                            <tr><td colspan="7" style="text-align:center; padding:30px;">Loading orders...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </main>
+</div>
+
+<!-- ===================== ADD/EDIT PRODUCT MODAL ===================== -->
+<div class="admin-modal-overlay" id="productModalOverlay">
+    <div class="admin-modal-box">
+        <button class="modal-close" onclick="closeProductFormModal()" aria-label="Close" style="position:absolute;">×</button>
+        <h3 id="productModalTitle">Add Product</h3>
+        <form id="productForm" style="margin-top:16px;">
+            <input type="hidden" id="editProductId">
+            <div class="form-row">
+                <div class="form-group"><label>Product Code *</label><input type="text" id="f_product_code" required></div>
+                <div class="form-group"><label>Product Name *</label><input type="text" id="f_product_name" required></div>
+            </div>
+            <div class="form-row">
+                <div class="form-group"><label>Category *</label><input type="text" id="f_category" required></div>
+                <div class="form-group"><label>Sub Category</label><input type="text" id="f_sub_category"></div>
+            </div>
+            <div class="form-row">
+                <div class="form-group"><label>Brand</label><input type="text" id="f_brand"></div>
+                <div class="form-group"><label>Unit</label><input type="text" id="f_unit" placeholder="e.g. 1 kg"></div>
+            </div>
+            <div class="form-row">
+                <div class="form-group"><label>Price (₹) *</label><input type="number" id="f_price" required></div>
+                <div class="form-group"><label>Offer Price (₹)</label><input type="number" id="f_offer_price"></div>
+            </div>
+            <div class="form-row">
+                <div class="form-group"><label>Stock *</label><input type="number" id="f_stock" value="0"></div>
+                <div class="form-group"><label>Status</label>
+                    <select id="f_status" style="width:100%; padding:11px; border:1.5px solid var(--border); border-radius:8px;">
+                        <option value="active">Active</option>
+                        <option value="inactive">Inactive</option>
+                    </select>
+                </div>
+            </div>
+            <div class="form-group"><label>Description</label><textarea id="f_description" rows="2"></textarea></div>
+
+            <div class="form-group" id="imageUploadGroup" style="display:none;">
+                <label>Product Image</label>
+                <input type="file" id="f_image" accept=".jpg,.jpeg,.png,.webp">
+                <p style="font-size:11.5px; color:var(--text-muted); margin-top:4px;">JPG, PNG or WEBP. Save the product first, then upload its image.</p>
+            </div>
+
+            <button type="submit" class="btn btn-primary btn-block btn-lg" style="margin-top:10px;">Save Product</button>
+        </form>
+    </div>
+</div>
+
+<!-- ===================== ORDER DETAIL / PACKING MODAL ===================== -->
+<div class="admin-modal-overlay" id="orderModalOverlay">
+    <div class="admin-modal-box" style="max-width:640px;">
+        <button class="modal-close" onclick="closeOrderModal()" aria-label="Close" style="position:absolute;">×</button>
+        <div id="orderModalContent"><!-- injected --></div>
+    </div>
+</div>
+
+<script src="js/app.js"></script>
+<script src="js/admin.js"></script>
+</body>
+</html>

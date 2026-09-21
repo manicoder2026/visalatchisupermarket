@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Visalatchi Super Market | Groceries Delivered Free to Your Door</title>
+<meta name="description" content="Shop groceries, snacks and household essentials from Visalatchi Super Market, Virudhunagar. Free home delivery on every order.">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<!-- ===================== HEADER ===================== -->
+<header class="site-header">
+    <div class="delivery-strip">🛒 FREE HOME DELIVERY on every order — shop from home, we bring it to you!</div>
+    <div class="container header-top">
+        <a href="index.html" class="logo">
+            <span class="logo-name">VISALATCHI</span>
+            <span class="logo-tagline">SUPER MARKET</span>
+        </a>
+
+        <nav class="main-nav">
+            <a href="index.html" class="active">Home</a>
+            <a href="products.html">Categories</a>
+            <a href="products.html">Products</a>
+            <a href="index.html#offers">Offers</a>
+            <a href="index.html#about">About Us</a>
+            <a href="index.html#contact">Contact</a>
+        </nav>
+
+        <div class="header-search">
+            <span class="search-icon">🔍</span>
+            <input type="text" placeholder="Search for rice, biscuits, soap, vegetables...">
+            <div class="search-suggestions"></div>
+        </div>
+
+        <div class="header-actions">
+            <button class="hamburger-btn" aria-label="Open menu">☰</button>
+            <a href="cart.html" class="icon-btn" aria-label="Cart">
+                🛒<span class="cart-count">0</span>
+            </a>
+            <a href="admin.html" class="icon-btn" aria-label="Login">👤</a>
+        </div>
+    </div>
+</header>
+
+<!-- Mobile nav drawer -->
+<div class="mobile-nav-overlay"></div>
+<div class="mobile-nav">
+    <button class="mobile-nav-close" aria-label="Close menu">×</button>
+    <a href="index.html">Home</a>
+    <a href="products.html">Categories</a>
+    <a href="products.html">Products</a>
+    <a href="index.html#offers">Offers</a>
+    <a href="index.html#about">About Us</a>
+    <a href="index.html#contact">Contact</a>
+    <a href="cart.html">My Cart</a>
+</div>
+
+<!-- ===================== HERO ===================== -->
+<section class="hero">
+    <div class="container hero-grid">
+        <div class="hero-content">
+            <div class="hero-badge"><span class="badge-delivery">🛒 FREE HOME DELIVERY</span></div>
+            <h1>Your Everyday Shopping, Delivered to Your Door</h1>
+            <p>Shop groceries, snacks, household essentials and more from Visalatchi Super Market — fresh, trusted, and affordable.</p>
+            <div class="hero-buttons">
+                <a href="products.html" class="btn btn-primary btn-lg">Shop Now</a>
+                <a href="#categories" class="btn btn-secondary btn-lg">View Categories</a>
+            </div>
+        </div>
+        <div class="hero-visual" aria-hidden="true">🛒🥬</div>
+    </div>
+</section>
+
+<!-- ===================== CATEGORIES ===================== -->
+<section class="section" id="categories">
+    <div class="container">
+        <div class="section-head">
+            <div>
+                <h2 class="section-title">Shop by Category</h2>
+                <p class="section-subtitle">Everything for your home, in one place</p>
+            </div>
+        </div>
+        <div class="category-grid" id="categoryGrid">
+            <!-- Category cards are injected by home.js -->
+        </div>
+    </div>
+</section>
+
+<!-- ===================== OFFERS ===================== -->
+<section class="section section-alt" id="offers">
+    <div class="container">
+        <div class="section-head">
+            <div>
+                <h2 class="section-title">Today's Best Deals</h2>
+                <p class="section-subtitle">Up to 20% OFF on grocery, household and snack essentials</p>
+            </div>
+            <a href="products.html?onOffer=true" class="btn btn-outline btn-sm">View All Offers →</a>
+        </div>
+        <div class="product-grid" id="offersGrid">
+            <!-- Offer product cards injected by home.js -->
+        </div>
+    </div>
+</section>
+
+<!-- ===================== POPULAR PRODUCTS ===================== -->
+<section class="section">
+    <div class="container">
+        <div class="section-head">
+            <div>
+                <h2 class="section-title">Popular Products</h2>
+                <p class="section-subtitle">Frequently bought by our customers</p>
+            </div>
+            <a href="products.html" class="btn btn-outline btn-sm">View All →</a>
+        </div>
+        <div class="product-grid" id="popularGrid">
+            <!-- Popular product cards injected by home.js -->
+        </div>
+    </div>
+</section>
+
+<!-- ===================== GROCERY ESSENTIALS ===================== -->
+<section class="section section-alt">
+    <div class="container">
+        <div class="section-head">
+            <div>
+                <h2 class="section-title">Grocery Essentials</h2>
+                <p class="section-subtitle">Rice, dhall and daily kitchen must-haves</p>
+            </div>
+            <a href="products.html?category=Rice" class="btn btn-outline btn-sm">View All →</a>
+        </div>
+        <div class="product-grid" id="essentialsGrid">
+            <!-- Essentials cards injected by home.js -->
+        </div>
+    </div>
+</section>
+
+<!-- ===================== WHY CHOOSE US ===================== -->
+<section class="section">
+    <div class="container">
+        <div class="section-head">
+            <div>
+                <h2 class="section-title">Why Choose Us</h2>
+            </div>
+        </div>
+        <div class="feature-grid">
+            <div class="feature-card">
+                <div class="feature-icon">🛒</div>
+                <div class="feature-title">Wide Product Range</div>
+                <div class="feature-text">Thousands of everyday products in one place.</div>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">🚚</div>
+                <div class="feature-title">Free Home Delivery</div>
+                <div class="feature-text">Convenient delivery to your doorstep.</div>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">💰</div>
+                <div class="feature-title">Great Value</div>
+                <div class="feature-text">Competitive prices and attractive offers.</div>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">🤝</div>
+                <div class="feature-title">Local & Trusted</div>
+                <div class="feature-text">Your neighbourhood supermarket in Virudhunagar.</div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ===================== FREE DELIVERY BANNER ===================== -->
+<section class="section">
+    <div class="promo-banner">
+        <h2>SHOP FROM HOME. WE'LL BRING IT TO YOU.</h2>
+        <div><span class="badge-delivery">🚚 FREE HOME DELIVERY</span></div>
+        <a href="products.html" class="btn btn-primary btn-lg">Start Shopping</a>
+    </div>
+</section>
+
+<!-- ===================== ABOUT + CONTACT ===================== -->
+<section class="section" id="about">
+    <div class="container about-contact-grid">
+        <div class="info-card">
+            <h3>About Visalatchi Super Market</h3>
+            <p style="color:var(--text-muted); font-size:14px; line-height:1.7;">
+                Visalatchi Super Market is a local supermarket in Virudhunagar, proudly serving the community with
+                fresh groceries, everyday essentials and trusted brands at affordable prices. We now bring the same
+                friendly, trusted shopping experience online — with free home delivery on every order.
+            </p>
+        </div>
+        <div class="info-card" id="contact">
+            <h3>Visit or Contact Us</h3>
+            <div class="info-row"><span class="label">Address:</span><span>8/1127/20 E, Sivakasi Byepass Road, Virudhunagar – 626001, Tamil Nadu, India</span></div>
+            <div class="info-row"><span class="label">Phone:</span><span>7448446555 , 8940317678</span></div>
+            <div class="info-row"><span class="label">Email:</span><span>Add supermarket email address</span></div>
+            <div class="info-row"><span class="label">Hours:</span><span>8:30 AM TO 11:00 PM</span></div>
+            <iframe
+                src="https://www.google.com/maps?q=9.5836437,77.9415652&z=17&output=embed"
+                width="100%"
+                height="220"
+                style="border:0; border-radius:14px;"
+                allowfullscreen=""
+                loading="lazy">
+            </iframe>
+        </div>
+    </div>
+</section>
+
+<!-- ===================== FOOTER ===================== -->
+<footer class="site-footer">
+    <div class="container">
+        <div class="footer-grid">
+            <div>
+                <div class="footer-brand">VISALATCHI SUPER MARKET</div>
+                <div class="footer-tagline">Your trusted local supermarket for everyday shopping.</div>
+                <span class="badge-delivery">FREE HOME DELIVERY</span>
+            </div>
+            <div class="footer-col">
+                <h4>Quick Links</h4>
+                <a href="index.html">Home</a>
+                <a href="products.html">Products</a>
+                <a href="index.html#categories">Categories</a>
+                <a href="index.html#offers">Offers</a>
+            </div>
+            <div class="footer-col">
+                <h4>More</h4>
+                <a href="index.html#about">About</a>
+                <a href="index.html#contact">Contact</a>
+                <a href="#">Privacy Policy</a>
+                <a href="#">Terms &amp; Conditions</a>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <span>© 2026 Visalatchi Super Market. All Rights Reserved.</span>
+            <span>8/1127/20 E, Sivakasi Byepass Road, Virudhunagar – 626001, Tamil Nadu, India</span>
+        </div>
+    </div>
+</footer>
+
+<script src="js/app.js"></script>
+<script src="js/product-cards.js"></script>
+<script src="js/home.js"></script>
+<script src="js/product-modal.js"></script>
+</body>
+</html>
