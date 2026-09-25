@@ -199,18 +199,30 @@ function initHeader() {
     const mobileNavOverlay = document.querySelector('.mobile-nav-overlay');
     const mobileNavClose = document.querySelector('.mobile-nav-close');
 
-    function openMobileNav() {
-        mobileNav && mobileNav.classList.add('open');
-        mobileNavOverlay && mobileNavOverlay.classList.add('show');
+    function openMobileNav(e) {
+        if (e && e.preventDefault) e.preventDefault();
+        if (mobileNav) mobileNav.classList.add('open');
+        if (mobileNavOverlay) mobileNavOverlay.classList.add('show');
+        document.body.style.overflow = 'hidden';
     }
-    function closeMobileNav() {
-        mobileNav && mobileNav.classList.remove('open');
-        mobileNavOverlay && mobileNavOverlay.classList.remove('show');
+    function closeMobileNav(e) {
+        if (e && e.preventDefault) e.preventDefault();
+        if (mobileNav) mobileNav.classList.remove('open');
+        if (mobileNavOverlay) mobileNavOverlay.classList.remove('show');
+        document.body.style.overflow = '';
     }
 
-    hamburgerBtn && hamburgerBtn.addEventListener('click', openMobileNav);
-    mobileNavClose && mobileNavClose.addEventListener('click', closeMobileNav);
-    mobileNavOverlay && mobileNavOverlay.addEventListener('click', closeMobileNav);
+    if (hamburgerBtn) hamburgerBtn.onclick = openMobileNav;
+    if (mobileNavClose) mobileNavClose.onclick = closeMobileNav;
+    if (mobileNavOverlay) mobileNavOverlay.onclick = closeMobileNav;
+
+    if (mobileNav) {
+        mobileNav.querySelectorAll('a').forEach(link => {
+            link.addEventListener('click', () => {
+                closeMobileNav();
+            });
+        });
+    }
 
     // Header search with live suggestions
     const searchInput = document.querySelector('.header-search input');
@@ -266,4 +278,8 @@ function initHeader() {
     }
 }
 
-document.addEventListener('DOMContentLoaded', initHeader);
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initHeader);
+} else {
+    initHeader();
+}
