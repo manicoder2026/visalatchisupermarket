@@ -135,7 +135,14 @@ const seed = db.transaction(() => {
     });
 });
 
-seed();
+function runSeed() {
+    seed();
+    console.log(`Seed complete: ${categories.length} categories, ${products.length} sample products inserted.`);
+    console.log('Replace this sample data any time using Admin Dashboard -> Product Import.');
+}
 
-console.log(`Seed complete: ${categories.length} categories, ${products.length} sample products inserted.`);
-console.log('Replace this sample data any time using Admin Dashboard -> Product Import.');
+if (require.main === module) {
+    runSeed();
+}
+
+module.exports = runSeed;

@@ -55,6 +55,18 @@ app.use((err, req, res, next) => {
 // Make sure a default admin account exists so the dashboard can always be reached
 ensureDefaultAdmin();
 
+// Auto-seed starter categories and products on fresh deploy if database is empty
+try {
+    const db = require('./db');
+    const existingCategories = db.prepare('SELECT COUNT(*) AS total FROM categories').get();
+    if (existingCategories.total === 0) {
+        const runSeed = require('../database/seed');
+        runSeed();
+    }
+} catch (seedErr) {
+    console.warn('Auto-seed check failed:', seedErr.message);
+}
+
 app.listen(PORT, () => {
     console.log('===================================================');
     console.log('  VISALATCHI SUPER MARKET server is running');
