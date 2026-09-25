@@ -25,6 +25,15 @@ document.addEventListener('DOMContentLoaded', async () => {
     await loadOrderSummary(cart);
     document.getElementById('placeOrderBtn').addEventListener('click', submitOrder);
 
+    // Pre-populate customer details if logged in
+    const customer = getCustomerInfo();
+    if (customer) {
+        const nameField = document.getElementById('customer_name');
+        const phoneField = document.getElementById('customer_phone');
+        if (nameField && customer.name) nameField.value = customer.name;
+        if (phoneField && customer.phone) phoneField.value = customer.phone;
+    }
+
     // Only allow digits in phone and pincode fields
     document.getElementById('customer_phone').addEventListener('input', (e) => {
         e.target.value = e.target.value.replace(/\D/g, '').slice(0, 10);
@@ -118,13 +127,18 @@ async function submitOrder() {
         items: currentCartItems.map(item => ({ product_id: item.product.id, quantity: item.quantity }))
     };
 
+    const headers = { 'Content-Type': 'application/json' };
+    const token = getCustomerToken();
+    if (token) headers['Authorization'] = `Bearer ${token}`;
+
     try {
         const data = await apiRequest(`${API_BASE}/orders`, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers,
             body: JSON.stringify(orderPayload)
         });
 
+        savePlacedOrder(data.order.order_number);
         clearCart();
         window.location.href = `order-success.html?order=${data.order.order_number}`;
     } catch (err) {

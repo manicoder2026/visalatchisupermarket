@@ -14,20 +14,66 @@
 <!-- ===================== LOGIN SCREEN ===================== -->
 <div id="loginScreen">
     <div class="admin-login-box">
-        <h2>Staff Login</h2>
-        <p>VISALATCHI SUPER MARKET admin dashboard</p>
-        <div class="form-group">
-            <label for="loginUsername">Username</label>
-            <input type="text" id="loginUsername" placeholder="Username">
+        <div class="login-brand-header">
+            <img src="images/logo.png" alt="Visalatchi Super Market" class="login-logo-img">
+            <h2>Visalatchi Super Market</h2>
+            <p>Customer &amp; Admin Portal</p>
         </div>
-        <div class="form-group">
-            <label for="loginPassword">Password</label>
-            <input type="password" id="loginPassword" placeholder="Password">
+
+        <!-- Auth Tabs -->
+        <div class="auth-tabs">
+            <button class="auth-tab active" id="tabSignInBtn" type="button">Sign In</button>
+            <button class="auth-tab" id="tabRegisterBtn" type="button">Create Account</button>
         </div>
-        <button class="btn btn-primary btn-block btn-lg" id="loginBtn">Log In</button>
-        <p style="font-size:12px; color:var(--text-muted); text-align:center; margin-top:16px;">
-            Default admin credentials are set in your .env file.
-        </p>
+
+        <!-- SIGN IN FORM -->
+        <div id="signInFormSection">
+            <div class="form-group">
+                <label for="loginUsername">Username or Mobile Number</label>
+                <input type="text" id="loginUsername" placeholder="e.g. admin or 9840112233" autocomplete="username">
+            </div>
+            <div class="form-group">
+                <label for="loginPassword">Password</label>
+                <input type="password" id="loginPassword" placeholder="Enter password" autocomplete="current-password">
+            </div>
+            <button class="btn btn-primary btn-block btn-lg" id="loginBtn">Sign In</button>
+            <p class="auth-footnote">
+                🔐 Admins will enter the Staff Dashboard. Customers will be redirected to Store &amp; My Orders.
+            </p>
+        </div>
+
+        <!-- REGISTER FORM -->
+        <div id="registerFormSection" class="hidden">
+            <div class="form-group">
+                <label for="regName">Full Name *</label>
+                <input type="text" id="regName" placeholder="e.g. Kumar Raj">
+            </div>
+            <div class="form-group">
+                <label for="regPhone">Mobile Number (10 digits) *</label>
+                <input type="tel" id="regPhone" placeholder="e.g. 9840112233" maxlength="10">
+            </div>
+            <div class="form-group">
+                <label for="regUsername">Choose Username *</label>
+                <input type="text" id="regUsername" placeholder="e.g. kumar99">
+            </div>
+            <div class="form-group">
+                <label for="regPassword">Password *</label>
+                <input type="password" id="regPassword" placeholder="Minimum 4 characters">
+                <small class="form-hint">Note: Password cannot be the same as your username.</small>
+            </div>
+            <div class="form-group">
+                <label for="regConfirmPassword">Confirm Password *</label>
+                <input type="password" id="regConfirmPassword" placeholder="Re-enter password">
+            </div>
+            <button class="btn btn-primary btn-block btn-lg" id="registerBtn">Create My Account</button>
+            <p class="auth-footnote">
+                Already have an account? <a href="#" id="switchSignInLink" style="color:var(--green); font-weight:700;">Sign in here</a>
+            </p>
+        </div>
+
+        <div style="margin-top:20px; text-align:center;">
+            <a href="index.html" class="btn btn-outline btn-sm">← Back to Store</a>
+        </div>
     </div>
 </div>
 
@@ -36,7 +82,10 @@
     <div class="admin-sidebar-backdrop" id="adminSidebarBackdrop"></div>
     <aside class="admin-sidebar" id="adminSidebar">
         <div class="admin-sidebar-header">
-            <span class="logo-name">VISALATCHI</span>
+            <div style="display:flex; align-items:center; gap:10px;">
+                <img src="images/logo.png" alt="Logo" style="width:34px; height:34px; border-radius:50%; object-fit:contain; background:#000;">
+                <span class="logo-name">VISALATCHI</span>
+            </div>
             <button class="admin-sidebar-close" id="adminSidebarClose" aria-label="Close menu">✕</button>
         </div>
         <a class="admin-nav-item active" data-view="dashboardView">📊 Dashboard</a>

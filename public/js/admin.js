@@ -21,6 +21,29 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('loginPassword').addEventListener('keydown', (e) => {
         if (e.key === 'Enter') handleLogin();
     });
+
+    const tabSignIn = document.getElementById('tabSignInBtn');
+    const tabRegister = document.getElementById('tabRegisterBtn');
+    const switchSignInLink = document.getElementById('switchSignInLink');
+    const registerBtn = document.getElementById('registerBtn');
+    const regPhone = document.getElementById('regPhone');
+
+    if (tabSignIn) tabSignIn.addEventListener('click', () => switchAuthTab('signin'));
+    if (tabRegister) tabRegister.addEventListener('click', () => switchAuthTab('register'));
+    if (switchSignInLink) switchSignInLink.addEventListener('click', (e) => { e.preventDefault(); switchAuthTab('signin'); });
+    if (registerBtn) registerBtn.addEventListener('click', handleRegister);
+    if (regPhone) {
+        regPhone.addEventListener('input', (e) => {
+            e.target.value = e.target.value.replace(/\D/g, '').slice(0, 10);
+        });
+    }
+
+    const regConfirmPass = document.getElementById('regConfirmPassword');
+    if (regConfirmPass) {
+        regConfirmPass.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') handleRegister();
+        });
+    }
     document.getElementById('logoutBtn').addEventListener('click', handleLogout);
     const mobileLogout = document.getElementById('mobileLogoutBtn');
     if (mobileLogout) mobileLogout.addEventListener('click', handleLogout);
@@ -83,6 +106,25 @@ function showDashboard() {
     loadDashboardStats();
 }
 
+function switchAuthTab(tab) {
+    const signInSection = document.getElementById('signInFormSection');
+    const registerSection = document.getElementById('registerFormSection');
+    const tabSignIn = document.getElementById('tabSignInBtn');
+    const tabRegister = document.getElementById('tabRegisterBtn');
+
+    if (tab === 'register') {
+        if (signInSection) signInSection.classList.add('hidden');
+        if (registerSection) registerSection.classList.remove('hidden');
+        if (tabSignIn) tabSignIn.classList.remove('active');
+        if (tabRegister) tabRegister.classList.add('active');
+    } else {
+        if (registerSection) registerSection.classList.add('hidden');
+        if (signInSection) signInSection.classList.remove('hidden');
+        if (tabRegister) tabRegister.classList.remove('active');
+        if (tabSignIn) tabSignIn.classList.add('active');
+    }
+}
+
 async function handleLogin() {
     const username = document.getElementById('loginUsername').value.trim();
     const password = document.getElementById('loginPassword').value;
@@ -92,19 +134,84 @@ async function handleLogin() {
         return;
     }
 
+    const btn = document.getElementById('loginBtn');
+    btn.disabled = true;
+    btn.textContent = 'Signing in...';
+
     try {
-        const data = await apiRequest(`${API_BASE}/admin/login`, {
+        const data = await apiRequest(`${API_BASE}/login`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ username, password })
         });
 
-        localStorage.setItem(ADMIN_TOKEN_KEY, data.token);
-        localStorage.setItem(ADMIN_INFO_KEY, JSON.stringify(data.admin));
-        showToast('Welcome back!');
-        showDashboard();
+        if (data.role === 'admin') {
+            localStorage.setItem(ADMIN_TOKEN_KEY, data.token);
+            localStorage.setItem(ADMIN_INFO_KEY, JSON.stringify(data.admin || data.user));
+            showToast('Welcome back, Admin!');
+            showDashboard();
+        } else {
+            // Customer logged in!
+            setCustomerAuth(data.token, data.user);
+            showToast(`Welcome back, ${data.user.name || data.user.username}!`);
+            setTimeout(() => {
+                const urlParams = new URLSearchParams(window.location.search);
+                const redirect = urlParams.get('redirect') || 'my-orders.html';
+                window.location.href = redirect;
+            }, 800);
+        }
     } catch (err) {
         // apiRequest already showed the error toast
+    } finally {
+        btn.disabled = false;
+        btn.textContent = 'Sign In';
+    }
+}
+
+async function handleRegister() {
+    const name = document.getElementById('regName').value.trim();
+    const phone = document.getElementById('regPhone').value.trim();
+    const username = document.getElementById('regUsername').value.trim();
+    const password = document.getElementById('regPassword').value;
+    const confirm_password = document.getElementById('regConfirmPassword').value;
+
+    if (!name) return showToast('Please enter your full name.', 'error');
+    if (!phone || !/^\d{10}$/.test(phone)) return showToast('Please enter a valid 10-digit mobile number.', 'error');
+    if (!username) return showToast('Please choose a username.', 'error');
+    if (!password) return showToast('Please enter a password.', 'error');
+    if (password.length < 4) return showToast('Password must be at least 4 characters.', 'error');
+
+    // Security Rule 1: Same username and password avoided
+    if (password.toLowerCase() === username.toLowerCase()) {
+        return showToast('Password cannot be the same as your username.', 'error');
+    }
+
+    // Security Rule 2: Password confirmation mismatch
+    if (password !== confirm_password) {
+        return showToast('Passwords do not match. Please verify your password.', 'error');
+    }
+
+    const regBtn = document.getElementById('registerBtn');
+    regBtn.disabled = true;
+    regBtn.textContent = 'Creating Account...';
+
+    try {
+        const data = await apiRequest(`${API_BASE}/register`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ name, phone, username, password, confirm_password })
+        });
+
+        setCustomerAuth(data.token, data.user);
+        showToast(data.message || 'Account created successfully!');
+        setTimeout(() => {
+            window.location.href = 'my-orders.html';
+        }, 900);
+    } catch (err) {
+        // apiRequest showed the toast
+    } finally {
+        regBtn.disabled = false;
+        regBtn.textContent = 'Create My Account';
     }
 }
 

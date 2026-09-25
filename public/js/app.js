@@ -12,6 +12,88 @@ const API_BASE = '/api';
 const CART_STORAGE_KEY = 'vsm_cart';
 const RECENTLY_VIEWED_KEY = 'vsm_recently_viewed';
 const WISHLIST_KEY = 'vsm_wishlist';
+const CUSTOMER_TOKEN_KEY = 'vsm_customer_token';
+const CUSTOMER_INFO_KEY = 'vsm_customer_info';
+
+// ---------------------------------------------------------
+// CUSTOMER AUTH HELPERS
+// ---------------------------------------------------------
+function getCustomerToken() {
+    return localStorage.getItem(CUSTOMER_TOKEN_KEY);
+}
+
+function getCustomerInfo() {
+    try {
+        const raw = localStorage.getItem(CUSTOMER_INFO_KEY);
+        return raw ? JSON.parse(raw) : null;
+    } catch (e) {
+        return null;
+    }
+}
+
+function setCustomerAuth(token, user) {
+    if (token) localStorage.setItem(CUSTOMER_TOKEN_KEY, token);
+    if (user) localStorage.setItem(CUSTOMER_INFO_KEY, JSON.stringify(user));
+    updateHeaderAuthUI();
+}
+
+function logoutCustomer() {
+    localStorage.removeItem(CUSTOMER_TOKEN_KEY);
+    localStorage.removeItem(CUSTOMER_INFO_KEY);
+    showToast('Logged out successfully.');
+    updateHeaderAuthUI();
+    setTimeout(() => {
+        window.location.reload();
+    }, 400);
+}
+
+function savePlacedOrder(orderNumber) {
+    if (!orderNumber) return;
+    try {
+        const orders = JSON.parse(localStorage.getItem('vsm_placed_orders') || '[]');
+        if (!orders.includes(orderNumber)) {
+            orders.unshift(orderNumber);
+            localStorage.setItem('vsm_placed_orders', JSON.stringify(orders.slice(0, 50)));
+        }
+    } catch (e) {}
+}
+
+function updateHeaderAuthUI() {
+    const userWrap = document.getElementById('userAuthWrap');
+    const customer = getCustomerInfo();
+    const mobileAuthLink = document.getElementById('mobileAuthLink');
+
+    if (userWrap) {
+        if (customer && customer.name) {
+            const firstName = customer.name.split(' ')[0];
+            userWrap.innerHTML = `
+                <div class="user-badge" title="${escapeHtml(customer.name)} (${escapeHtml(customer.username || '')})">
+                    <a href="my-orders.html" class="user-badge-name">👤 ${escapeHtml(firstName)}</a>
+                    <button class="user-badge-logout" onclick="logoutCustomer()" title="Log out">✕</button>
+                </div>
+            `;
+        } else {
+            userWrap.innerHTML = `
+                <a href="admin.html" class="icon-btn" id="headerUserBtn" title="Sign In / Register" aria-label="Account">👤</a>
+            `;
+        }
+    }
+
+    if (mobileAuthLink) {
+        if (customer && customer.name) {
+            mobileAuthLink.innerHTML = `👤 ${escapeHtml(customer.name)} (Log Out)`;
+            mobileAuthLink.href = '#';
+            mobileAuthLink.onclick = (e) => {
+                e.preventDefault();
+                logoutCustomer();
+            };
+        } else {
+            mobileAuthLink.innerHTML = `🔐 Sign In / Staff Login`;
+            mobileAuthLink.href = 'admin.html';
+            mobileAuthLink.onclick = null;
+        }
+    }
+}
 
 // ---------------------------------------------------------
 // CART STORAGE (guest cart lives in the browser, no login needed)
@@ -192,6 +274,7 @@ async function apiRequest(url, options = {}) {
 // ---------------------------------------------------------
 function initHeader() {
     updateCartBadge();
+    updateHeaderAuthUI();
 
     // Mobile hamburger menu
     const hamburgerBtn = document.querySelector('.hamburger-btn');

@@ -34,6 +34,7 @@ app.use(express.static(path.join(__dirname, '..', 'public')));
 app.use('/api', productsRoutes);
 app.use('/api', ordersRoutes);
 app.use('/api', authRoutes);
+app.use('/api/auth', authRoutes);
 app.use('/api/admin', adminRoutes);
 
 // Simple health check, useful when deploying

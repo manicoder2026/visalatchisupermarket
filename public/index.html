@@ -16,8 +16,11 @@
     <div class="delivery-strip">🛒 FREE HOME DELIVERY on every order — shop from home, we bring it to you!</div>
     <div class="container header-top">
         <a href="index.html" class="logo">
-            <span class="logo-name">VISALATCHI</span>
-            <span class="logo-tagline">SUPER MARKET</span>
+            <img src="images/logo.png" alt="Visalatchi Super Market Logo" class="logo-img">
+            <div class="logo-text">
+                <span class="logo-name">VISALATCHI</span>
+                <span class="logo-tagline">SUPER MARKET</span>
+            </div>
         </a>
 
         <nav class="main-nav">
@@ -37,10 +40,13 @@
 
         <div class="header-actions">
             <button class="hamburger-btn" aria-label="Open menu">☰</button>
+            <a href="my-orders.html" class="my-orders-btn" id="headerMyOrdersBtn">📦 My Orders</a>
             <a href="cart.html" class="icon-btn" aria-label="Cart">
                 🛒<span class="cart-count">0</span>
             </a>
-            <a href="admin.html" class="icon-btn" aria-label="Login">👤</a>
+            <div class="user-auth-wrap" id="userAuthWrap">
+                <a href="admin.html" class="icon-btn" id="headerUserBtn" title="Sign In / Register" aria-label="Login">👤</a>
+            </div>
         </div>
     </div>
 </header>
@@ -49,17 +55,21 @@
 <div class="mobile-nav-overlay"></div>
 <div class="mobile-nav">
     <div class="mobile-nav-head">
-        <span class="mobile-nav-title">Menu</span>
+        <div style="display:flex; align-items:center; gap:8px;">
+            <img src="images/logo.png" alt="Logo" style="width:30px; height:30px; border-radius:50%; object-fit:cover; background:#000;">
+            <span class="mobile-nav-title">Menu</span>
+        </div>
         <button class="mobile-nav-close" aria-label="Close menu">✕</button>
     </div>
     <a href="index.html">🏠 Home</a>
     <a href="products.html">🗂️ Categories</a>
     <a href="products.html">🛍️ Products</a>
+    <a href="my-orders.html">📦 My Orders</a>
+    <a href="cart.html">🛒 My Cart</a>
     <a href="index.html#offers">🏷️ Offers</a>
     <a href="index.html#about">ℹ️ About Us</a>
     <a href="index.html#contact">📞 Contact</a>
-    <a href="cart.html">🛒 My Cart</a>
-    <a href="admin.html" class="mobile-nav-admin">🔐 Staff / Admin Login</a>
+    <a href="admin.html" class="mobile-nav-admin" id="mobileAuthLink">🔐 Sign In / Staff Login</a>
 </div>
 
 <!-- ===================== HERO ===================== -->

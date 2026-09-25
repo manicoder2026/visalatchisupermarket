@@ -1,9 +1,13 @@
 // server/controllers/ordersController.js
 // -----------------------------------------------------------------
-// Handles placing new orders, viewing an order, and updating status.
+// Handles placing new orders, viewing an order, order history, and status.
 // -----------------------------------------------------------------
 
+const jwt = require('jsonwebtoken');
 const db = require('../db');
+require('dotenv').config();
+
+const JWT_SECRET = process.env.JWT_SECRET || 'visalatchi_default_jwt_secret_key_2026';
 
 // Generates an order number like "VSM100245"
 function generateOrderNumber() {
@@ -13,12 +17,6 @@ function generateOrderNumber() {
 }
 
 // POST /api/orders
-// Expected body:
-// {
-//   customer_name, customer_phone, house_number, street, area, city, pincode,
-//   landmark, delivery_instructions,
-//   items: [{ product_id, quantity }]
-// }
 function createOrder(req, res) {
     try {
         const {
@@ -40,7 +38,19 @@ function createOrder(req, res) {
             return res.status(400).json({ error: 'Your cart is empty. Please add items before ordering.' });
         }
 
-        // ---- Look up each product fresh from the database (never trust client-sent prices) ----
+        // Detect logged-in user if token provided
+        let userId = null;
+        const authHeader = req.headers.authorization;
+        if (authHeader && authHeader.startsWith('Bearer ')) {
+            try {
+                const decoded = jwt.verify(authHeader.split(' ')[1], JWT_SECRET);
+                if (decoded && decoded.id) {
+                    userId = decoded.id;
+                }
+            } catch (e) { /* ignore invalid token for guest order */ }
+        }
+
+        // Look up each product fresh from the database
         const getProduct = db.prepare("SELECT * FROM products WHERE id = ? AND status = 'active'");
         const orderItemsData = [];
         let subtotal = 0;
@@ -73,12 +83,12 @@ function createOrder(req, res) {
         const total = subtotal + deliveryFee;
         const orderNumber = generateOrderNumber();
 
-        // ---- Insert order + order items + reduce stock, all inside one transaction ----
+        // Insert order + order items + reduce stock, all inside one transaction
         const insertOrder = db.prepare(`
             INSERT INTO orders
-                (order_number, customer_name, customer_phone, house_number, street, area, city, pincode,
+                (order_number, user_id, customer_name, customer_phone, house_number, street, area, city, pincode,
                  landmark, delivery_instructions, subtotal, delivery_fee, total, status)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'Pending')
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'Pending')
         `);
 
         const insertItem = db.prepare(`
@@ -90,7 +100,7 @@ function createOrder(req, res) {
 
         const placeOrder = db.transaction(() => {
             const result = insertOrder.run(
-                orderNumber, customer_name.trim(), customer_phone.trim(),
+                orderNumber, userId, customer_name.trim(), customer_phone.trim(),
                 house_number || '', street, area, city, pincode,
                 landmark || '', delivery_instructions || '',
                 subtotal, deliveryFee, total
@@ -113,41 +123,107 @@ function createOrder(req, res) {
             order: {
                 id: orderId,
                 order_number: orderNumber,
+                customer_name,
+                customer_phone,
                 total,
-                delivery_fee: deliveryFee,
-                status: 'Pending'
+                status: 'Pending',
+                items: orderItemsData
             }
         });
     } catch (err) {
         console.error('createOrder error:', err);
-        res.status(500).json({ error: "We couldn't place your order right now. Please try again." });
+        res.status(500).json({ error: 'Could not place your order right now. Please try again.' });
     }
 }
 
-// GET /api/orders/:id  (id can be numeric ID or order_number like VSM100245)
-function getOrderById(req, res) {
+// GET /api/orders/my-orders
+// Fetches all orders for the current customer (via JWT or phone query)
+function getMyOrders(req, res) {
     try {
-        const idParam = req.params.id;
-        const isOrderNumber = isNaN(idParam);
+        let userId = null;
+        let customerPhone = req.query.phone ? req.query.phone.trim() : null;
 
-        const order = isOrderNumber
-            ? db.prepare('SELECT * FROM orders WHERE order_number = ?').get(idParam)
-            : db.prepare('SELECT * FROM orders WHERE id = ?').get(idParam);
-
-        if (!order) {
-            return res.status(404).json({ error: 'Order not found. Please check your order ID.' });
+        const authHeader = req.headers.authorization;
+        if (authHeader && authHeader.startsWith('Bearer ')) {
+            try {
+                const decoded = jwt.verify(authHeader.split(' ')[1], JWT_SECRET);
+                if (decoded && decoded.id) {
+                    userId = decoded.id;
+                    if (decoded.phone && !customerPhone) {
+                        customerPhone = decoded.phone;
+                    }
+                }
+            } catch (e) {
+                // invalid token
+            }
         }
 
-        const items = db.prepare('SELECT * FROM order_items WHERE order_id = ?').all(order.id);
+        if (!userId && !customerPhone) {
+            return res.status(401).json({ error: 'Please log in to view your orders.' });
+        }
 
-        res.json({ order, items });
+        let orders;
+        if (userId && customerPhone) {
+            orders = db.prepare(`
+                SELECT * FROM orders 
+                WHERE user_id = ? OR customer_phone = ? 
+                ORDER BY created_at DESC
+            `).all(userId, customerPhone);
+        } else if (userId) {
+            orders = db.prepare(`
+                SELECT * FROM orders 
+                WHERE user_id = ? 
+                ORDER BY created_at DESC
+            `).all(userId);
+        } else {
+            orders = db.prepare(`
+                SELECT * FROM orders 
+                WHERE customer_phone = ? 
+                ORDER BY created_at DESC
+            `).all(customerPhone);
+        }
+
+        const getItems = db.prepare('SELECT * FROM order_items WHERE order_id = ?');
+
+        const populatedOrders = orders.map(order => {
+            const items = getItems.all(order.id);
+            return {
+                ...order,
+                items
+            };
+        });
+
+        res.json({ orders: populatedOrders });
     } catch (err) {
-        console.error('getOrderById error:', err);
-        res.status(500).json({ error: 'Could not load this order right now. Please try again.' });
+        console.error('getMyOrders error:', err);
+        res.status(500).json({ error: 'Could not load your orders.' });
     }
 }
 
-// PUT /api/orders/:id/status   (used by staff)
+// GET /api/orders/:orderNumber
+// Public: customers use this to track their order
+function getOrderById(req, res) {
+    try {
+        const order = db.prepare(`
+            SELECT * FROM orders WHERE order_number = ?
+        `).get(req.params.orderNumber.toUpperCase());
+
+        if (!order) {
+            return res.status(404).json({ error: 'Order not found. Please check your order number.' });
+        }
+
+        const items = db.prepare(`
+            SELECT * FROM order_items WHERE order_id = ?
+        `).all(order.id);
+
+        res.json({ order: { ...order, items } });
+    } catch (err) {
+        console.error('getOrderById error:', err);
+        res.status(500).json({ error: 'Could not find this order. Please try again.' });
+    }
+}
+
+// PUT /api/orders/:id/status (used by staff)
 function updateOrderStatus(req, res) {
     try {
         const { status } = req.body;
@@ -173,4 +249,4 @@ function updateOrderStatus(req, res) {
     }
 }
 
-module.exports = { createOrder, getOrderById, updateOrderStatus };
+module.exports = { createOrder, getMyOrders, getOrderById, updateOrderStatus };

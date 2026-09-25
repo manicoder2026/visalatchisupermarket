@@ -191,18 +191,39 @@ button { font-family: var(--font-body); cursor: pointer; }
 
 .logo {
     display: flex;
-    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    text-decoration: none;
     line-height: 1.1;
     flex-shrink: 0;
 }
+.logo-img {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    object-fit: cover;
+    background: #000;
+    border: 1.5px solid rgba(16, 185, 129, 0.45);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    flex-shrink: 0;
+    transition: transform 0.2s ease;
+}
+.logo:hover .logo-img {
+    transform: scale(1.05);
+}
+.logo-text {
+    display: flex;
+    flex-direction: column;
+}
 .logo-name {
-    font-size: 21px;
+    font-size: 20px;
     font-weight: 800;
     color: var(--green-dark);
     letter-spacing: -0.02em;
+    font-family: var(--font-heading);
 }
 .logo-tagline {
-    font-size: 10.5px;
+    font-size: 10px;
     color: var(--green);
     font-weight: 700;
     letter-spacing: 0.8px;
@@ -270,6 +291,68 @@ button { font-family: var(--font-body); cursor: pointer; }
     align-items: center;
     justify-content: center;
     padding: 0 3px;
+}
+
+.my-orders-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 14px;
+    background: var(--bg-subtle);
+    border: 1px solid var(--border);
+    border-radius: 9999px;
+    font-size: 13.5px;
+    font-weight: 700;
+    color: var(--text-dark);
+    text-decoration: none;
+    transition: all 0.18s ease;
+    white-space: nowrap;
+}
+.my-orders-btn:hover,
+.my-orders-btn.active {
+    background: var(--green-light);
+    border-color: rgba(16, 185, 129, 0.4);
+    color: var(--green-dark);
+    transform: translateY(-1px);
+    box-shadow: 0 2px 6px rgba(5, 150, 105, 0.12);
+}
+
+.user-auth-wrap {
+    display: flex;
+    align-items: center;
+}
+.user-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--green-light);
+    border: 1px solid rgba(16, 185, 129, 0.35);
+    border-radius: 9999px;
+    padding: 6px 12px;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--green-dark);
+    box-shadow: var(--shadow-xs);
+}
+.user-badge-name {
+    color: var(--green-dark);
+    text-decoration: none;
+}
+.user-badge-logout {
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    cursor: pointer;
+    font-size: 13px;
+    padding: 0 3px;
+    border-radius: 50%;
+    line-height: 1;
+    transition: all 0.15s;
+    font-weight: 800;
+}
+.user-badge-logout:hover {
+    background: #fee2e2;
+    color: var(--red);
 }
 
 .header-search {
@@ -1464,6 +1547,213 @@ button { font-family: var(--font-body); cursor: pointer; }
 }
 .toast.error { background: var(--red); }
 @keyframes toast-in { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+/* =========================================================
+   LOGIN & REGISTRATION PORTAL
+   ========================================================= */
+.login-brand-header {
+    text-align: center;
+    margin-bottom: 22px;
+}
+.login-brand-header h2 {
+    font-size: 24px;
+    font-weight: 800;
+    color: var(--green-dark);
+    margin-bottom: 4px;
+}
+.login-brand-header p {
+    font-size: 13.5px;
+    color: var(--text-muted);
+}
+.login-logo-img {
+    width: 72px;
+    height: 72px;
+    border-radius: 50%;
+    object-fit: cover;
+    background: #000;
+    border: 2.5px solid var(--green-mid);
+    box-shadow: 0 4px 14px rgba(5, 150, 105, 0.25);
+    margin: 0 auto 14px auto;
+    display: block;
+}
+.auth-tabs {
+    display: flex;
+    background: var(--bg-subtle);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 4px;
+    margin-bottom: 22px;
+    gap: 4px;
+}
+.auth-tab {
+    flex: 1;
+    padding: 10px;
+    font-weight: 700;
+    font-size: 14px;
+    border: none;
+    background: none;
+    border-radius: 6px;
+    color: var(--text-muted);
+    cursor: pointer;
+    transition: all 0.18s ease;
+    text-align: center;
+}
+.auth-tab.active {
+    background: var(--white);
+    color: var(--green-dark);
+    box-shadow: var(--shadow-xs);
+}
+.auth-footnote {
+    font-size: 12.5px;
+    color: var(--text-muted);
+    text-align: center;
+    margin-top: 16px;
+    line-height: 1.5;
+}
+.form-hint {
+    display: block;
+    font-size: 11.5px;
+    color: var(--text-muted);
+    margin-top: 4px;
+}
+
+/* =========================================================
+   MY ORDERS PAGE
+   ========================================================= */
+.my-orders-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    margin-bottom: 28px;
+    flex-wrap: wrap;
+    gap: 16px;
+}
+.my-order-card {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    padding: 22px;
+    margin-bottom: 20px;
+    box-shadow: var(--shadow-card);
+    transition: all 0.2s ease;
+    position: relative;
+    overflow: hidden;
+}
+.my-order-card:hover {
+    box-shadow: var(--shadow-md);
+    border-color: rgba(16, 185, 129, 0.35);
+}
+.my-order-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    background: var(--primary-gradient);
+}
+.my-order-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 14px;
+    margin-bottom: 16px;
+    flex-wrap: wrap;
+    gap: 12px;
+}
+.my-order-num {
+    font-size: 17px;
+    font-weight: 800;
+    font-family: var(--font-heading);
+    color: var(--green-dark);
+}
+.my-order-date {
+    font-size: 12.5px;
+    color: var(--text-muted);
+    margin-top: 2px;
+}
+.order-status-pill {
+    display: inline-block;
+    padding: 4px 12px;
+    border-radius: 9999px;
+    font-size: 12px;
+    font-weight: 800;
+    letter-spacing: 0.3px;
+    text-transform: uppercase;
+}
+.status-pending { background: #fef3c7; color: #b45309; }
+.status-confirmed { background: #e0f2fe; color: #0369a1; }
+.status-packing { background: #ede9fe; color: #6d28d9; }
+.status-delivery { background: #ffedd5; color: #c2410c; }
+.status-delivered { background: #dcfce7; color: #15803d; }
+.status-cancelled { background: #fee2e2; color: #b91c1c; }
+
+.my-order-items {
+    margin-bottom: 16px;
+}
+.my-order-item-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 0;
+    border-bottom: 1px dashed var(--border);
+    font-size: 14px;
+}
+.my-order-item-row:last-child {
+    border-bottom: none;
+}
+.my-order-item-name {
+    flex: 2;
+    font-weight: 600;
+    color: var(--text-dark);
+}
+.my-order-item-qty {
+    flex: 1;
+    text-align: center;
+    color: var(--text-muted);
+    font-size: 13px;
+}
+.my-order-item-price {
+    flex: 1;
+    text-align: right;
+    font-weight: 700;
+    color: var(--text-dark);
+}
+.my-order-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-top: 14px;
+    border-top: 1px solid var(--border);
+    flex-wrap: wrap;
+    gap: 14px;
+}
+.my-order-address {
+    font-size: 13px;
+    color: var(--text-muted);
+    line-height: 1.5;
+    max-width: 60%;
+}
+.my-order-total-box {
+    text-align: right;
+    display: flex;
+    flex-direction: column;
+}
+.my-order-total-val {
+    font-size: 20px;
+    font-weight: 800;
+    color: var(--green-dark);
+    font-family: var(--font-heading);
+}
+
+.empty-orders-card,
+.login-prompt-card {
+    text-align: center;
+    padding: 60px 24px;
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-card);
+}
 
 /* =========================================================
    RESPONSIVE

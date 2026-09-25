@@ -50,10 +50,13 @@ CREATE TABLE IF NOT EXISTS users (
     id            INTEGER PRIMARY KEY AUTOINCREMENT,
     name          TEXT NOT NULL,
     phone         TEXT NOT NULL UNIQUE,
+    username      TEXT UNIQUE,
     email         TEXT,
     password_hash TEXT,                     -- NULL for guest-only customers
     created_at    DATETIME DEFAULT CURRENT_TIMESTAMP
 );
+
+CREATE UNIQUE INDEX IF NOT EXISTS idx_users_username ON users (username);
 
 -- ---------------------------------------------------------
 -- ADMINS / STAFF LOGIN

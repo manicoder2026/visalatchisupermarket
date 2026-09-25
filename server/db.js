@@ -25,4 +25,15 @@ const schemaPath = path.join(__dirname, '..', 'database', 'schema.sql');
 const schemaSql = fs.readFileSync(schemaPath, 'utf8');
 db.exec(schemaSql);
 
+// Safe schema migrations for existing databases
+try {
+    const userCols = db.prepare('PRAGMA table_info(users)').all().map(c => c.name);
+    if (!userCols.includes('username')) {
+        db.exec('ALTER TABLE users ADD COLUMN username TEXT');
+        db.exec('CREATE UNIQUE INDEX IF NOT EXISTS idx_users_username ON users (username)');
+    }
+} catch (migErr) {
+    console.warn('User table migration warning:', migErr.message);
+}
+
 module.exports = db;
