@@ -55,11 +55,12 @@ app.use((err, req, res, next) => {
 // Make sure a default admin account exists so the dashboard can always be reached
 ensureDefaultAdmin();
 
-// Auto-seed starter categories and products on fresh deploy if database is empty
+// Auto-seed starter categories or missing product pictures on deploy
 try {
     const db = require('./db');
-    const existingCategories = db.prepare('SELECT COUNT(*) AS total FROM categories').get();
-    if (existingCategories.total === 0) {
+    const existingCategories = db.prepare('SELECT COUNT(*) AS total FROM categories').get().total;
+    const missingImages = db.prepare('SELECT COUNT(*) AS total FROM products WHERE image IS NULL').get().total;
+    if (existingCategories === 0 || missingImages > 0) {
         const runSeed = require('../database/seed');
         runSeed();
     }
