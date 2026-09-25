@@ -22,9 +22,24 @@ document.addEventListener('DOMContentLoaded', () => {
         if (e.key === 'Enter') handleLogin();
     });
     document.getElementById('logoutBtn').addEventListener('click', handleLogout);
+    const mobileLogout = document.getElementById('mobileLogoutBtn');
+    if (mobileLogout) mobileLogout.addEventListener('click', handleLogout);
+
+    const menuToggle = document.getElementById('adminMenuToggle');
+    if (menuToggle) menuToggle.addEventListener('click', openAdminSidebar);
+
+    const sidebarClose = document.getElementById('adminSidebarClose');
+    if (sidebarClose) sidebarClose.addEventListener('click', closeAdminSidebar);
+
+    const backdrop = document.getElementById('adminSidebarBackdrop');
+    if (backdrop) backdrop.addEventListener('click', closeAdminSidebar);
 
     document.querySelectorAll('.admin-nav-item[data-view]').forEach(link => {
         link.addEventListener('click', () => switchView(link.dataset.view));
+    });
+
+    document.querySelectorAll('.admin-bottom-nav-item[data-view]').forEach(btn => {
+        btn.addEventListener('click', () => switchView(btn.dataset.view));
     });
 
     document.getElementById('addProductBtn').addEventListener('click', () => openProductFormModal());
@@ -114,6 +129,20 @@ async function adminApiRequest(url, options = {}) {
     }
 }
 
+function openAdminSidebar() {
+    const sidebar = document.getElementById('adminSidebar');
+    const backdrop = document.getElementById('adminSidebarBackdrop');
+    if (sidebar) sidebar.classList.add('show-mobile');
+    if (backdrop) backdrop.classList.add('show');
+}
+
+function closeAdminSidebar() {
+    const sidebar = document.getElementById('adminSidebar');
+    const backdrop = document.getElementById('adminSidebarBackdrop');
+    if (sidebar) sidebar.classList.remove('show-mobile');
+    if (backdrop) backdrop.classList.remove('show');
+}
+
 // ---------------------------------------------------------
 // VIEW SWITCHING
 // ---------------------------------------------------------
@@ -124,6 +153,12 @@ function switchView(viewId) {
     document.querySelectorAll('.admin-nav-item[data-view]').forEach(link => {
         link.classList.toggle('active', link.dataset.view === viewId);
     });
+
+    document.querySelectorAll('.admin-bottom-nav-item[data-view]').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.view === viewId);
+    });
+
+    closeAdminSidebar();
 
     const titles = {
         dashboardView: 'Dashboard',

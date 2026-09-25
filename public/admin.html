@@ -30,20 +30,30 @@
 
 <!-- ===================== ADMIN DASHBOARD ===================== -->
 <div id="adminDashboard" class="admin-layout hidden">
-    <aside class="admin-sidebar">
-        <span class="logo-name">VISALATCHI</span>
+    <div class="admin-sidebar-backdrop" id="adminSidebarBackdrop"></div>
+    <aside class="admin-sidebar" id="adminSidebar">
+        <div class="admin-sidebar-header">
+            <span class="logo-name">VISALATCHI</span>
+            <button class="admin-sidebar-close" id="adminSidebarClose" aria-label="Close menu">✕</button>
+        </div>
         <a class="admin-nav-item active" data-view="dashboardView">📊 Dashboard</a>
         <a class="admin-nav-item" data-view="productsView">📦 Products</a>
         <a class="admin-nav-item" data-view="importView">📥 Import / Export</a>
         <a class="admin-nav-item" data-view="ordersView">🧾 Orders</a>
-        <a class="admin-nav-item" id="logoutBtn" style="margin-top:30px;">🚪 Log Out</a>
+        <a class="admin-nav-item" id="logoutBtn" style="margin-top:24px;">🚪 Log Out</a>
         <a class="admin-nav-item" href="index.html">🌐 View Website</a>
     </aside>
 
     <main class="admin-main">
         <div class="admin-topbar">
-            <h1 id="adminPageTitle">Dashboard</h1>
-            <span id="adminUsername" style="font-size:14px; color:var(--text-muted);"></span>
+            <div class="admin-topbar-left">
+                <button class="admin-menu-toggle" id="adminMenuToggle" aria-label="Open menu">☰</button>
+                <h1 id="adminPageTitle">Dashboard</h1>
+            </div>
+            <div class="admin-topbar-right">
+                <span id="adminUsername"></span>
+                <button class="admin-quick-logout" id="mobileLogoutBtn">🚪 Log Out</button>
+            </div>
         </div>
 
         <!-- ---------- DASHBOARD VIEW ---------- -->
@@ -162,8 +172,27 @@ RIC001,Aashirvaad Rice,Rice,Aashirvaad,650,599,30,5 kg,</pre>
                     </table>
                 </div>
             </div>
-        </div>
     </main>
+
+    <!-- Mobile Bottom Navigation -->
+    <nav class="admin-bottom-nav" id="adminBottomNav">
+        <button class="admin-bottom-nav-item active" data-view="dashboardView" type="button">
+            <span class="admin-nav-icon">📊</span>
+            <span class="admin-nav-text">Stats</span>
+        </button>
+        <button class="admin-bottom-nav-item" data-view="productsView" type="button">
+            <span class="admin-nav-icon">📦</span>
+            <span class="admin-nav-text">Products</span>
+        </button>
+        <button class="admin-bottom-nav-item" data-view="ordersView" type="button">
+            <span class="admin-nav-icon">🧾</span>
+            <span class="admin-nav-text">Orders</span>
+        </button>
+        <button class="admin-bottom-nav-item" data-view="importView" type="button">
+            <span class="admin-nav-icon">📥</span>
+            <span class="admin-nav-text">Import</span>
+        </button>
+    </nav>
 </div>
 
 <!-- ===================== ADD/EDIT PRODUCT MODAL ===================== -->
