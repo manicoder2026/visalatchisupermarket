@@ -275,6 +275,7 @@ async function apiRequest(url, options = {}) {
 function initHeader() {
     updateCartBadge();
     updateHeaderAuthUI();
+    loadHeaderCategories();
 
     // Mobile hamburger menu
     const hamburgerBtn = document.querySelector('.hamburger-btn');
@@ -300,22 +301,44 @@ function initHeader() {
     if (mobileNavOverlay) mobileNavOverlay.onclick = closeMobileNav;
 
     if (mobileNav) {
+        // Close menu when tapping normal links (not dropdown toggle)
         mobileNav.querySelectorAll('a').forEach(link => {
             link.addEventListener('click', () => {
                 closeMobileNav();
             });
         });
+
+        // Mobile category toggle
+        const catToggle = mobileNav.querySelector('#mobileCategoryToggle');
+        const catSub = mobileNav.querySelector('#mobileCategorySub');
+        const catArrow = mobileNav.querySelector('#mobileCategoryArrow');
+        if (catToggle && catSub) {
+            catToggle.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                catSub.classList.toggle('open');
+                if (catArrow) {
+                    catArrow.textContent = catSub.classList.contains('open') ? '▴' : '▾';
+                }
+            });
+        }
     }
 
-    // Header search with live suggestions
-    const searchInput = document.querySelector('.header-search input');
-    const suggestionsBox = document.querySelector('.search-suggestions');
-    let searchTimer = null;
+    // Universal Search Bar Setup (Desktop Header, Mobile Header Bar, Hero Search)
+    const searchContainers = document.querySelectorAll('.header-search, .mobile-search-bar, .hero-search-wrap, .hero-search-box');
+    searchContainers.forEach(container => {
+        const input = container.querySelector('input');
+        const suggestionsBox = container.querySelector('.search-suggestions');
+        const searchBtn = container.querySelector('.hero-search-btn');
+        if (!input) return;
 
-    if (searchInput && suggestionsBox) {
-        searchInput.addEventListener('input', () => {
-            const q = searchInput.value.trim();
+        let searchTimer = null;
+
+        input.addEventListener('input', () => {
+            const q = input.value.trim();
             clearTimeout(searchTimer);
+
+            if (!suggestionsBox) return;
 
             if (q.length < 2) {
                 suggestionsBox.classList.remove('show');
@@ -326,38 +349,122 @@ function initHeader() {
             searchTimer = setTimeout(async () => {
                 try {
                     const data = await apiRequest(`${API_BASE}/products/search?q=${encodeURIComponent(q)}`);
-                    renderSearchSuggestions(data.products || []);
-                } catch (e) { /* toast already shown */ }
-            }, 300);
+                    renderSearchSuggestions(suggestionsBox, data.products || [], q);
+                } catch (e) { /* silent */ }
+            }, 250);
         });
 
-        searchInput.addEventListener('keydown', (e) => {
+        input.addEventListener('keydown', (e) => {
             if (e.key === 'Enter') {
-                window.location.href = `products.html?search=${encodeURIComponent(searchInput.value.trim())}`;
+                const q = input.value.trim();
+                if (q) {
+                    window.location.href = `products.html?search=${encodeURIComponent(q)}`;
+                }
             }
         });
 
-        document.addEventListener('click', (e) => {
-            if (!e.target.closest('.header-search')) {
-                suggestionsBox.classList.remove('show');
-            }
-        });
-    }
+        if (searchBtn) {
+            searchBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                const q = input.value.trim();
+                if (q) {
+                    window.location.href = `products.html?search=${encodeURIComponent(q)}`;
+                }
+            });
+        }
+    });
 
-    function renderSearchSuggestions(products) {
+    // Close any active suggestion boxes when clicking outside
+    document.addEventListener('click', (e) => {
+        if (!e.target.closest('.header-search, .mobile-search-bar, .hero-search-wrap, .hero-search-box')) {
+            document.querySelectorAll('.search-suggestions').forEach(box => {
+                box.classList.remove('show');
+            });
+        }
+    });
+
+    function renderSearchSuggestions(suggestionsBox, products, query) {
+        if (!suggestionsBox) return;
+
         if (products.length === 0) {
-            suggestionsBox.innerHTML = `<div class="search-suggestion-item"><span class="s-meta">No products found. Try another search.</span></div>`;
+            suggestionsBox.innerHTML = `
+                <div class="search-suggestion-item">
+                    <span class="s-meta">No products found matching "${escapeHtml(query)}".</span>
+                </div>
+            `;
             suggestionsBox.classList.add('show');
             return;
         }
 
-        suggestionsBox.innerHTML = products.slice(0, 8).map(p => `
+        const itemsHtml = products.slice(0, 7).map(p => `
             <div class="search-suggestion-item" onclick="window.location.href='products.html?product=${p.id}'">
                 <span class="s-name">${escapeHtml(p.product_name)}</span>
-                <span class="s-meta">${escapeHtml(p.category)}</span>
+                <span class="s-meta">${escapeHtml(p.category)} · <strong style="color:var(--green-dark);">${formatPrice(p.offer_price || p.price)}</strong></span>
             </div>
         `).join('');
+
+        const viewAllHtml = `
+            <div class="search-suggestion-item" style="background:var(--green-pale); border-top:1px solid var(--border);" onclick="window.location.href='products.html?search=${encodeURIComponent(query)}'">
+                <span class="s-name" style="color:var(--green-dark); font-weight:700;">🔍 View all results for "${escapeHtml(query)}"</span>
+            </div>
+        `;
+
+        suggestionsBox.innerHTML = itemsHtml + viewAllHtml;
         suggestionsBox.classList.add('show');
+    }
+}
+
+// Loads dynamic categories for Desktop Nav Dropdown and Mobile Nav Drawer
+async function loadHeaderCategories() {
+    try {
+        const desktopMenu = document.getElementById('headerCategoryDropdown');
+        const mobileSub = document.getElementById('mobileCategorySub');
+        if (!desktopMenu && !mobileSub) return;
+
+        const data = await apiRequest(`${API_BASE}/categories`);
+        const categories = data.categories || [];
+        if (categories.length === 0) return;
+
+        if (desktopMenu) {
+            desktopMenu.innerHTML = categories.map(cat => `
+                <a href="products.html?category=${encodeURIComponent(cat.name)}" class="nav-dropdown-item">
+                    <span style="font-size:16px;">${cat.icon || '🛒'}</span>
+                    <span>${escapeHtml(cat.name)}</span>
+                </a>
+            `).join('') + `
+                <a href="products.html" class="nav-dropdown-item nav-dropdown-item-all">
+                    <span style="font-size:16px;">🛍️</span>
+                    <span>View All Categories</span>
+                </a>
+            `;
+        }
+
+        if (mobileSub) {
+            mobileSub.innerHTML = categories.map(cat => `
+                <a href="products.html?category=${encodeURIComponent(cat.name)}">
+                    ${cat.icon || '🛒'} ${escapeHtml(cat.name)}
+                </a>
+            `).join('') + `
+                <a href="products.html" style="font-weight:700; color:var(--green-dark);">
+                    🛍️ All Products
+                </a>
+            `;
+
+            // Attach close nav click on newly created links
+            const mobileNav = document.querySelector('.mobile-nav');
+            if (mobileNav) {
+                mobileSub.querySelectorAll('a').forEach(link => {
+                    link.addEventListener('click', () => {
+                        mobileNav.classList.remove('open');
+                        const overlay = document.querySelector('.mobile-nav-overlay');
+                        if (overlay) overlay.classList.remove('show');
+                        document.body.style.overflow = '';
+                    });
+                });
+            }
+        }
+    } catch (err) {
+        // Fallback or offline
     }
 }
 

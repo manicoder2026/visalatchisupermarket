@@ -169,16 +169,15 @@
 
                 <div id="importResults" class="import-results hidden"></div>
 
-                <h4 style="margin-top:26px; margin-bottom:8px;">Required CSV Format</h4>
+                <h4 style="margin-top:26px; margin-bottom:8px;">Standard CSV Format</h4>
                 <p style="color:var(--text-muted); font-size:13px; margin-bottom:8px;">
-                    Your CSV needs these column headers in the first row (product_code, product_name, category and price are required; the rest are optional):
+                    Your CSV file needs these column headers in the first row. <strong>MRP</strong> is the printed/regular price, and <strong>price</strong> is your store selling price (discounted price):
                 </p>
-                <pre style="background:var(--green-pale); padding:12px; border-radius:8px; font-size:12.5px; overflow-x:auto;">product_code,product_name,category,brand,price,offer_price,stock,unit,image
-RIC001,Aashirvaad Rice,Rice,Aashirvaad,650,599,30,5 kg,</pre>
+                <pre style="background:var(--green-pale); padding:12px; border-radius:8px; font-size:12.5px; overflow-x:auto;">product_code,product_name,category,MRP,price,image
+RIC001,Aashirvaad Rice,Rice,650,600,images/products/rice.jpg
+ATT001,Aashirvaad Chakki Atta 5kg,Atta &amp; Dal,320,295,images/products/atta.jpg</pre>
                 <p style="color:var(--text-muted); font-size:12.5px; margin-top:8px;">
-                    Tip: if your product list is currently a Word document, open it in Word, select the table, and use
-                    "Save As" → CSV, or copy it into Excel/Google Sheets and export as CSV.
-                    Products with a <code>product_code</code> that already exists will be updated automatically instead of duplicated.
+                    💡 <em>Optional columns if needed:</em> <code>brand, stock, unit, description</code> (stock defaults to 100 if omitted). Products with an existing <code>product_code</code> are updated automatically.
                 </p>
             </div>
 

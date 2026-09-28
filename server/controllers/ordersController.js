@@ -200,13 +200,23 @@ function getMyOrders(req, res) {
     }
 }
 
-// GET /api/orders/:orderNumber
+// GET /api/orders/:orderNumber or /api/orders/:id
 // Public: customers use this to track their order
 function getOrderById(req, res) {
     try {
+        const identifier = (req.params.orderNumber || req.params.id || '').trim();
+
+        if (!identifier) {
+            return res.status(400).json({ error: 'Order ID or order number is required.' });
+        }
+
+        const numericId = parseInt(identifier, 10);
+        const isNumeric = !isNaN(numericId) && String(numericId) === identifier;
+
         const order = db.prepare(`
-            SELECT * FROM orders WHERE order_number = ?
-        `).get(req.params.orderNumber.toUpperCase());
+            SELECT * FROM orders 
+            WHERE UPPER(order_number) = ? OR id = ?
+        `).get(identifier.toUpperCase(), isNumeric ? numericId : -1);
 
         if (!order) {
             return res.status(404).json({ error: 'Order not found. Please check your order number.' });
@@ -216,7 +226,7 @@ function getOrderById(req, res) {
             SELECT * FROM order_items WHERE order_id = ?
         `).all(order.id);
 
-        res.json({ order: { ...order, items } });
+        res.json({ order: { ...order, items }, items });
     } catch (err) {
         console.error('getOrderById error:', err);
         res.status(500).json({ error: 'Could not find this order. Please try again.' });
