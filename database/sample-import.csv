@@ -1,7 +1,7 @@
 product_code,product_name,category,MRP,price,image
 RIC001,Aashirvaad Rice 5kg,Rice,650,600,images/products/rice.jpg
-ATT001,Aashirvaad Shudh Chakki Atta 5kg,Atta & Dal,320,295,images/products/atta.jpg
+POW001,Aashirvaad Shudh Chakki Atta 5kg,Powders,320,295,images/products/atta.jpg
 OIL001,Fortune Sunlite Sunflower Oil 1L,Cooking Oil,155,138,images/products/oil.jpg
-SNK001,Parle-G Gold Biscuits 1kg,Snacks,120,105,images/products/parleg.jpg
+BIS001,Parle-G Gold Biscuits 1kg,Biscuits,120,105,images/products/parleg.jpg
 BEV001,Bru Instant Coffee 100g,Beverages,220,199,images/products/bru.jpg
-DAI001,Amul Butter Pasteurised 500g,Dairy & Eggs,285,270,images/products/butter.jpg
+GEN001,Amul Butter Pasteurised 500g,General Groceries,285,270,images/products/butter.jpg

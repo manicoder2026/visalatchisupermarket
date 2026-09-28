@@ -13,22 +13,26 @@
 const db = require('../server/db');
 
 const categories = [
-    { name: 'Cookies',          icon: '🍪' },
-    { name: 'Biscuits',         icon: '🍘' },
-    { name: 'Chocolates',       icon: '🍫' },
-    { name: 'Ice Cream',        icon: '🍨' },
-    { name: 'Snacks',           icon: '🥨' },
-    { name: 'Rice',             icon: '🍚' },
-    { name: 'Dhall',            icon: '🌾' },
-    { name: 'Powders',          icon: '🥄' },
-    { name: 'Baby Items',       icon: '🍼' },
-    { name: 'Napkin',           icon: '🧻' },
-    { name: 'Shampoo',          icon: '🧴' },
-    { name: 'Pooja Items',      icon: '🪔' },
-    { name: 'Soaps & Liquids',  icon: '🧼' },
-    { name: 'Bathroom',         icon: '🚿' },
-    { name: 'Stationery',       icon: '✏️' },
-    { name: 'Vegetables',       icon: '🥬' }
+    { name: 'Rice',                 icon: '🍚' },
+    { name: 'Dhall',                icon: '🌾' },
+    { name: 'Cooking Oil',          icon: '🍳' },
+    { name: 'Powders',              icon: '🥄' },
+    { name: 'Beverages',            icon: '☕' },
+    { name: 'Biscuits',             icon: '🍘' },
+    { name: 'Cookies',              icon: '🍪' },
+    { name: 'Chocolates',           icon: '🍫' },
+    { name: 'Snacks',               icon: '🥨' },
+    { name: 'Ice Cream',            icon: '🍨' },
+    { name: 'Soaps & Liquids',      icon: '🧼' },
+    { name: 'Shampoo',              icon: '🧴' },
+    { name: 'Bathroom',             icon: '🚿' },
+    { name: 'Pooja Items',          icon: '🪔' },
+    { name: 'Baby Items',           icon: '🍼' },
+    { name: 'Napkin',               icon: '🧻' },
+    { name: 'Stationery',           icon: '✏️' },
+    { name: 'Vegetables',           icon: '🥬' },
+    { name: 'Household & Kitchen',  icon: '🍽️' },
+    { name: 'General Groceries',    icon: '🛒' }
 ];
 
 // Product tuples: [code, name, category, sub_category, brand, price, offer_price, stock, unit, image]
@@ -109,7 +113,19 @@ const products = [
     ['VEG001', 'Fresh Tomato', 'Vegetables', 'Fresh Vegetables', 'Local Farm', 40, null, 100, '1 kg', '/images/products/product-1789628992900.jpg'],
     ['VEG002', 'Fresh Onion', 'Vegetables', 'Fresh Vegetables', 'Local Farm', 35, 30, 120, '1 kg', '/images/products/product-1789629485382.jpg'],
     ['VEG003', 'Fresh Potato', 'Vegetables', 'Fresh Vegetables', 'Local Farm', 30, null, 130, '1 kg', '/images/products/product-1789629495740.jpg'],
-    ['VEG004', 'Fresh Carrot', 'Vegetables', 'Fresh Vegetables', 'Local Farm', 50, 45, 60, '1 kg', '/images/products/product-1788779966955.jpg']
+    ['VEG004', 'Fresh Carrot', 'Vegetables', 'Fresh Vegetables', 'Local Farm', 50, 45, 60, '1 kg', '/images/products/product-1788779966955.jpg'],
+
+    // Cooking Oil
+    ['OIL001', 'Fortune Sunlite Sunflower Oil 1L', 'Cooking Oil', 'Sunflower Oil', 'Fortune', 155, 138, 80, '1 L', 'https://images.unsplash.com/photo-1474979266404-7eaacbcd87c5?w=500&auto=format&fit=crop&q=80'],
+
+    // Beverages
+    ['BEV001', 'Bru Instant Coffee 100g', 'Beverages', 'Coffee', 'Bru', 220, 199, 90, '100 g', 'https://images.unsplash.com/photo-1559056199-641a0ac8b55e?w=500&auto=format&fit=crop&q=80'],
+
+    // Household & Kitchen
+    ['KIT001', 'Stainless Steel Kitchen Knife', 'Household & Kitchen', 'Utensils', 'Local', 95, 85, 50, '1 pc', 'https://images.unsplash.com/photo-1593618998160-e34014e67546?w=500&auto=format&fit=crop&q=80'],
+
+    // General Groceries
+    ['GEN001', 'Amul Butter Pasteurised 500g', 'General Groceries', 'Dairy', 'Amul', 285, 270, 60, '500 g', 'https://images.unsplash.com/photo-1589985270826-4b7bb135bc9d?w=500&auto=format&fit=crop&q=80']
 ];
 
 const insertCategory = db.prepare(`
@@ -123,13 +139,78 @@ const insertProduct = db.prepare(`
     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'active')
 `);
 
+const fs = require('fs');
+const path = require('path');
+
 const updateProductImage = db.prepare(`
     UPDATE products SET image = ? WHERE product_code = ? AND (image IS NULL OR image = '')
 `);
 
+const upsertCatalogProduct = db.prepare(`
+    INSERT INTO products (
+        product_code, product_name, category, price, offer_price, stock, unit, image, status
+    ) VALUES (?, ?, ?, ?, ?, 100, '1 unit', ?, 'active')
+    ON CONFLICT(product_code) DO UPDATE SET
+        product_name = excluded.product_name,
+        category = excluded.category,
+        price = excluded.price,
+        offer_price = excluded.offer_price
+`);
+
+function loadCategorizedCatalog() {
+    const catalogPath = path.join(__dirname, 'categorized-catalog.csv');
+    if (!fs.existsSync(catalogPath)) return 0;
+
+    const content = fs.readFileSync(catalogPath, 'utf8');
+    const lines = content.replace(/\r\n/g, '\n').split('\n');
+    let loaded = 0;
+
+    const batch = db.transaction(() => {
+        for (let i = 1; i < lines.length; i++) {
+            const line = lines[i].trim();
+            if (!line) continue;
+
+            const row = [];
+            let inQuotes = false;
+            let curr = '';
+            for (let j = 0; j < line.length; j++) {
+                const c = line[j];
+                if (c === '"') {
+                    inQuotes = !inQuotes;
+                } else if (c === ',' && !inQuotes) {
+                    row.push(curr.trim());
+                    curr = '';
+                } else {
+                    curr += c;
+                }
+            }
+            row.push(curr.trim());
+
+            const code = row[0];
+            const name = row[1];
+            const category = row[2];
+            const mrpStr = row[3];
+            const priceStr = row[4];
+            const image = row[5] || null;
+
+            if (!code || !name) continue;
+
+            const mrp = parseFloat(mrpStr) || 10;
+            const price = parseFloat(priceStr) || mrp;
+            const offer = (price > 0 && price < mrp) ? price : null;
+
+            upsertCatalogProduct.run(code, name, category, mrp, offer, image);
+            loaded++;
+        }
+    });
+
+    batch();
+    return loaded;
+}
+
 const seed = db.transaction(() => {
     categories.forEach((cat, index) => {
-        insertCategory.run(cat.name, cat.icon, index);
+        insertCategory.run(cat.name, cat.icon, index + 1);
     });
 
     products.forEach((p) => {
@@ -143,8 +224,11 @@ const seed = db.transaction(() => {
 
 function runSeed() {
     seed();
-    console.log(`Seed complete: ${categories.length} categories, ${products.length} sample products with pictures updated.`);
-    console.log('Replace this sample data any time using Admin Dashboard -> Product Import.');
+    const catalogCount = loadCategorizedCatalog();
+    console.log(`Seed complete: ${categories.length} categories, ${products.length} sample products with pictures.`);
+    if (catalogCount > 0) {
+        console.log(`Catalog sync complete: ${catalogCount} products synchronized from categorized-catalog.csv.`);
+    }
 }
 
 if (require.main === module) {
@@ -152,3 +236,4 @@ if (require.main === module) {
 }
 
 module.exports = runSeed;
+

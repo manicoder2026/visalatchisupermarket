@@ -36,4 +36,44 @@ try {
     console.warn('User table migration warning:', migErr.message);
 }
 
+// Ensure all 20 store categories exist in categories table
+const ALL_CATEGORIES = [
+    { name: 'Rice', icon: '🍚', display_order: 1 },
+    { name: 'Dhall', icon: '🌾', display_order: 2 },
+    { name: 'Cooking Oil', icon: '🍳', display_order: 3 },
+    { name: 'Powders', icon: '🥄', display_order: 4 },
+    { name: 'Beverages', icon: '☕', display_order: 5 },
+    { name: 'Biscuits', icon: '🍘', display_order: 6 },
+    { name: 'Cookies', icon: '🍪', display_order: 7 },
+    { name: 'Chocolates', icon: '🍫', display_order: 8 },
+    { name: 'Snacks', icon: '🥨', display_order: 9 },
+    { name: 'Ice Cream', icon: '🍨', display_order: 10 },
+    { name: 'Soaps & Liquids', icon: '🧼', display_order: 11 },
+    { name: 'Shampoo', icon: '🧴', display_order: 12 },
+    { name: 'Bathroom', icon: '🚿', display_order: 13 },
+    { name: 'Pooja Items', icon: '🪔', display_order: 14 },
+    { name: 'Baby Items', icon: '🍼', display_order: 15 },
+    { name: 'Napkin', icon: '🧻', display_order: 16 },
+    { name: 'Stationery', icon: '✏️', display_order: 17 },
+    { name: 'Vegetables', icon: '🥬', display_order: 18 },
+    { name: 'Household & Kitchen', icon: '🍽️', display_order: 19 },
+    { name: 'General Groceries', icon: '🛒', display_order: 20 }
+];
+
+try {
+    const insertCat = db.prepare(`
+        INSERT INTO categories (name, icon, display_order)
+        VALUES (?, ?, ?)
+        ON CONFLICT(name) DO UPDATE SET
+            icon = excluded.icon,
+            display_order = excluded.display_order
+    `);
+    const syncCats = db.transaction(() => {
+        ALL_CATEGORIES.forEach(c => insertCat.run(c.name, c.icon, c.display_order));
+    });
+    syncCats();
+} catch (catErr) {
+    console.warn('Category sync warning:', catErr.message);
+}
+
 module.exports = db;
