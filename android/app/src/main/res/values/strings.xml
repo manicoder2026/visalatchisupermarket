@@ -1,0 +1,9 @@
+<resources>
+    <string name="app_name">VSM</string>
+    <string name="full_app_name">VSM - Visalatchi Super Market</string>
+    <string name="web_url">https://visalatchisupermarket-1.onrender.com</string>
+    <string name="no_internet_title">No Internet Connection</string>
+    <string name="no_internet_msg">Please check your mobile data or Wi-Fi network and try again.</string>
+    <string name="retry_btn">Retry Connection</string>
+    <string name="press_again_exit">Press back again to exit VSM</string>
+</resources>

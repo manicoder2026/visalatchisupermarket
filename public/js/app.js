@@ -468,8 +468,61 @@ async function loadHeaderCategories() {
     }
 }
 
+// PWA Service Worker & Install Banner
+let deferredPrompt;
+if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/sw.js').catch(() => {});
+    });
+}
+
+window.addEventListener('beforeinstallprompt', (e) => {
+    e.preventDefault();
+    deferredPrompt = e;
+    showPwaInstallPrompt();
+});
+
+function showPwaInstallPrompt() {
+    let banner = document.getElementById('pwaInstallBanner');
+    if (!banner) {
+        banner = document.createElement('div');
+        banner.id = 'pwaInstallBanner';
+        banner.className = 'pwa-install-banner';
+        banner.innerHTML = `
+            <div style="display:flex; align-items:center; gap:10px;">
+                <img src="/images/logo.png" alt="VSM" style="width:34px; height:34px; border-radius:8px; object-fit:contain; background:#fff; padding:2px;">
+                <div>
+                    <strong style="display:block; font-size:13.5px; line-height:1.2;">VSM - Visalatchi App</strong>
+                    <span style="font-size:11.5px; opacity:0.9;">Fast, 1-tap grocery ordering</span>
+                </div>
+            </div>
+            <div style="display:flex; align-items:center; gap:8px;">
+                <button id="pwaInstallBtn" style="background:#fff; color:#1b8a5a; border:none; padding:7px 14px; border-radius:20px; font-weight:700; font-size:12.5px; cursor:pointer; box-shadow:0 2px 6px rgba(0,0,0,0.15);">Install</button>
+                <button id="pwaCloseBtn" style="background:transparent; color:#fff; border:none; font-size:16px; cursor:pointer; padding:4px 8px;">✕</button>
+            </div>
+        `;
+        document.body.prepend(banner);
+
+        document.getElementById('pwaInstallBtn').addEventListener('click', async () => {
+            if (deferredPrompt) {
+                deferredPrompt.prompt();
+                const { outcome } = await deferredPrompt.userChoice;
+                if (outcome === 'accepted') {
+                    banner.remove();
+                }
+                deferredPrompt = null;
+            }
+        });
+
+        document.getElementById('pwaCloseBtn').addEventListener('click', () => {
+            banner.remove();
+        });
+    }
+}
+
 if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', initHeader);
 } else {
     initHeader();
 }
+

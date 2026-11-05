@@ -2276,3 +2276,24 @@ button { font-family: var(--font-body); cursor: pointer; }
 .mt-0 { margin-top: 0; }
 .text-center { text-align: center; }
 .hidden { display: none !important; }
+
+/* PWA App Install Banner */
+.pwa-install-banner {
+    background: linear-gradient(135deg, #1b8a5a 0%, #146c46 100%);
+    color: #ffffff;
+    padding: 10px 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    position: sticky;
+    top: 0;
+    z-index: 10000;
+    animation: slideDown 0.3s ease;
+}
+
+@keyframes slideDown {
+    from { transform: translateY(-100%); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+}
+
